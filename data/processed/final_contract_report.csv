@@ -1,0 +1,2 @@
+risk_score,risk_level,unique_risk_types,missing_compliance_items,risk_penalty,compliance_penalty
+85,HIGH,2,5,25,60

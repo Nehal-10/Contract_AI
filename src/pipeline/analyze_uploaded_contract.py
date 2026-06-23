@@ -1,0 +1,201 @@
+from pathlib import Path
+import pandas as pd
+
+from src.extraction.pdf_extractor import extract_pdf_text
+
+from src.segmentation.clause_segmenter import (
+    segment_clauses
+)
+
+from src.risk_detection.risk_detector_v2 import (
+    detect_risks
+)
+
+from src.compliance.compliance_detector_v2 import (
+    detect_compliance
+)
+
+from src.scoring.risk_scoring import (
+    calculate_score
+)
+
+from src.classification.contract_classifier import (
+    classify_contract
+)
+
+
+def analyze_contract(pdf_path):
+
+    print("\n")
+    print("=" * 80)
+    print("CONTRACT ANALYSIS STARTED")
+    print("=" * 80)
+
+    # =====================================
+    # EXTRACT PDF TEXT
+    # =====================================
+
+    print("\nExtracting Text...")
+
+    text = extract_pdf_text(
+        pdf_path
+    )
+
+    print(
+        f"Characters Extracted: {len(text)}"
+    )
+
+    # =====================================
+    # SEGMENT CLAUSES
+    # =====================================
+
+    print("\nSegmenting Clauses...")
+
+    clauses_df = segment_clauses(
+        text
+    )
+
+    print(
+        f"Clauses Found: {len(clauses_df)}"
+    )
+
+    # =====================================
+    # CONTRACT TYPE
+    # =====================================
+
+    # temporary
+    contract_type = classify_contract(
+    text
+    )
+
+    print(
+        f"\nContract Type: {contract_type}"
+    )
+
+    # =====================================
+    # RISK DETECTION
+    # =====================================
+
+    print(
+        "\nRunning Risk Detection..."
+    )
+
+    risk_df = detect_risks(
+        clauses_df
+    )
+
+    print(
+        f"Risks Found: {len(risk_df)}"
+    )
+
+    # =====================================
+    # COMPLIANCE DETECTION
+    # =====================================
+
+    print(
+        "\nRunning Compliance Check..."
+    )
+
+    compliance_df = detect_compliance(
+        clauses_df
+    )
+
+    missing_count = len(
+
+        compliance_df[
+            compliance_df["status"]
+            == "MISSING"
+        ]
+
+    )
+
+    print(
+        f"Missing Compliance Items: "
+        f"{missing_count}"
+    )
+
+    # =====================================
+    # SCORING
+    # =====================================
+
+    print(
+        "\nCalculating Score..."
+    )
+
+    report = calculate_score(
+        risk_df,
+        compliance_df
+    )
+
+    # =====================================
+    # FINAL RESULT
+    # =====================================
+
+    result = {
+
+        "contract_type":
+            contract_type,
+
+        "risk_score":
+            report["risk_score"],
+
+        "risk_level":
+            report["risk_level"],
+
+        "unique_risk_types":
+            report["unique_risk_types"],
+
+        "missing_compliance_items":
+            report[
+                "missing_compliance_items"
+            ],
+
+        "risk_penalty":
+            report["risk_penalty"],
+
+        "compliance_penalty":
+            report[
+                "compliance_penalty"
+            ],
+
+        "risk_findings":
+            risk_df[
+                "risk_type"
+            ].dropna()
+             .unique()
+             .tolist(),
+
+        "missing_requirements":
+            compliance_df[
+                compliance_df["status"]
+                == "MISSING"
+            ]["requirement"]
+             .tolist()
+
+    }
+
+    print("\n")
+    print("=" * 80)
+    print("FINAL RESULT")
+    print("=" * 80)
+
+    for key, value in result.items():
+
+        print(
+            f"{key}: {value}"
+        )
+
+    return result
+
+
+if __name__ == "__main__":
+
+    pdf_file = (
+        Path("data/contracts")
+        /
+        "NondisclosureAgreement.pdf"
+    )
+
+    analyze_contract(
+        pdf_file
+    )

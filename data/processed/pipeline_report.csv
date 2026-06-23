@@ -1,0 +1,2 @@
+contract_type,risk_score,risk_level,unique_risk_types,missing_compliance_items,risk_penalty,compliance_penalty,risk_findings,missing_requirements
+NDA,85,HIGH,2,5,25,60,"['One Sided Termination', 'Confidentiality Forever']","['Consent', 'Data Retention', 'Right To Deletion', 'Data Processing', 'Data Transfer']"
