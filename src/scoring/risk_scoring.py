@@ -4,26 +4,13 @@ import pandas as pd
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 # ==========================================
-# RISK WEIGHTS
+# SEVERITY WEIGHTS
 # ==========================================
 
-RISK_WEIGHTS = {
-
-    "Unlimited Liability": 20,
-
-    "Broad Indemnity": 15,
-
-    "One Sided Termination": 15,
-
-    "Auto Renewal": 10,
-
-    "Confidentiality Forever": 10,
-
-    "No Audit Rights": 10,
-
-    "No Data Protection": 15,
-
-    "Weak Security Controls": 15
+SEVERITY_WEIGHTS = {
+    "LOW": 5,
+    "MEDIUM": 10,
+    "HIGH": 20
 }
 
 # ==========================================
@@ -32,17 +19,32 @@ RISK_WEIGHTS = {
 
 COMPLIANCE_WEIGHTS = {
 
-    "Consent": 10,
+    # NDA
+    "Definition Of Confidential Information": 10,
+    "Confidentiality Obligations": 15,
+    "Permitted Disclosures": 10,
+    "Return Or Destruction Of Information": 15,
+    "Term Of Confidentiality": 10,
+    "Governing Law": 10,
 
-    "Data Retention": 15,
+    # Employment
+    "Job Duties": 10,
+    "Compensation": 15,
+    "Termination": 15,
+    "Confidentiality": 10,
+    "Non Compete": 10,
 
-    "Right To Deletion": 15,
+    # MSA
+    "Scope Of Services": 10,
+    "Payment Terms": 15,
+    "Limitation Of Liability": 15,
+    "Termination Clause": 10,
+    "Dispute Resolution": 10,
 
-    "Data Processing": 10,
-
-    "Data Security": 20,
-
-    "Data Transfer": 10
+    # Vendor
+    "Goods Or Services": 10,
+    "Pricing": 15,
+    "Delivery Terms": 10
 }
 
 # ==========================================
@@ -63,26 +65,28 @@ def calculate_score(
     if (
         risk_df is not None
         and not risk_df.empty
-        and "risk_type" in risk_df.columns
     ):
 
         unique_risks = (
-
             risk_df["risk_type"]
             .dropna()
             .unique()
-
         )
 
-        for risk_type in unique_risks:
+        for _, row in risk_df.iterrows():
+
+            severity = str(
+                row.get(
+                    "severity",
+                    "MEDIUM"
+                )
+            ).upper()
 
             risk_penalty += (
-
-                RISK_WEIGHTS.get(
-                    risk_type,
+                SEVERITY_WEIGHTS.get(
+                    severity,
                     10
                 )
-
             )
 
     else:
@@ -94,25 +98,18 @@ def calculate_score(
     # ======================================
 
     missing_requirements = compliance_df[
-
-        compliance_df["status"]
-        == "MISSING"
-
+        compliance_df["status"] == "MISSING"
     ]
 
     compliance_penalty = 0
 
-    for _, row in (
-        missing_requirements.iterrows()
-    ):
+    for _, row in missing_requirements.iterrows():
 
         compliance_penalty += (
-
             COMPLIANCE_WEIGHTS.get(
                 row["requirement"],
                 10
             )
-
         )
 
     # ======================================
@@ -211,33 +208,23 @@ def calculate_score(
 
 
 # ==========================================
-# TEST MODE
+# TEST
 # ==========================================
 
 if __name__ == "__main__":
 
     risk_file = (
-
-        PROJECT_ROOT
-        /
-        "data"
-        /
-        "processed"
-        /
+        PROJECT_ROOT /
+        "data" /
+        "processed" /
         "risk_results.csv"
-
     )
 
     compliance_file = (
-
-        PROJECT_ROOT
-        /
-        "data"
-        /
-        "processed"
-        /
+        PROJECT_ROOT /
+        "data" /
+        "processed" /
         "compliance_report_v2.csv"
-
     )
 
     risk_df = pd.read_csv(
@@ -249,10 +236,8 @@ if __name__ == "__main__":
     )
 
     report = calculate_score(
-
         risk_df,
         compliance_df
-
     )
 
     print("\n")
@@ -271,22 +256,15 @@ if __name__ == "__main__":
     )
 
     output_file = (
-
-        PROJECT_ROOT
-        /
-        "data"
-        /
-        "processed"
-        /
+        PROJECT_ROOT /
+        "data" /
+        "processed" /
         "final_contract_report.csv"
-
     )
 
     report_df.to_csv(
-
         output_file,
         index=False
-
     )
 
     print("\nSaved:")

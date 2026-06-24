@@ -1,7 +1,7 @@
-requirement,description
-Job Responsibilities,Employee duties are clearly defined
-Compensation,Salary and payment terms are specified
-Termination Clause,Termination conditions are defined
-Confidentiality,Employee confidentiality obligations exist
-Leave Policy,Leave entitlement is defined
-Governing Law,Governing law is specified
+requirement,description,keywords
+Compensation,Salary and compensation details are specified,"salary|compensation|wages"
+Benefits,Employee benefits are described,"benefits|insurance|leave"
+Termination Clause,Employment termination conditions are defined,"terminate|termination|notice"
+Confidentiality,Employee confidentiality obligations exist,"confidential|confidentiality|information"
+Non Compete,Restrictions on competitive activities are defined,"compete|competitor|competition"
+Governing Law,Applicable governing law is specified,"law|jurisdiction|governing"

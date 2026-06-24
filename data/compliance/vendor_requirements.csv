@@ -1,7 +1,7 @@
-requirement,description
-Goods Or Services,Deliverables are clearly described
-Pricing,Price and payment terms are specified
-Delivery Terms,Delivery obligations are defined
-Termination Clause,Termination rights are defined
-Confidentiality,Confidentiality obligations exist
-Governing Law,Governing law is specified
+requirement,description,keywords
+Goods Or Services,Products or services to be delivered are clearly described,"goods|services|deliverables"
+Pricing,Pricing structure and payment obligations are specified,"price|pricing|payment"
+Delivery Terms,Delivery schedules and obligations are defined,"delivery|shipment|deliver"
+Termination Clause,Termination rights and notice periods are specified,"terminate|termination|notice"
+Confidentiality,Confidentiality obligations protecting information are included,"confidential|confidentiality|information"
+Governing Law,Applicable governing law and jurisdiction are specified,"law|jurisdiction|governing"

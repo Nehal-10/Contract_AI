@@ -1,32 +1,20 @@
 from pathlib import Path
 import pandas as pd
 
-from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
+
+from src.models.embedding_model import model
 
 
 SIMILARITY_THRESHOLD = 0.50
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
-# CLAUSES_FILE = (
-#     PROJECT_ROOT /
-#     "data" /
-#     "processed" /
-#     "all_clauses.csv"
-# )
-
 
 def detect_compliance(
     clauses_df,
     contract_type
 ):
-
-    # if clauses_df is None:
-
-    #     clauses_df = pd.read_csv(
-    #         CLAUSES_FILE
-    #     )
 
     clauses_df["text"] = (
         clauses_df["text"]
@@ -35,7 +23,7 @@ def detect_compliance(
     )
 
     # =====================================
-    # LOAD CONTRACT-SPECIFIC REQUIREMENTS
+    # LOAD REQUIREMENTS BASED ON CONTRACT
     # =====================================
 
     if contract_type == "NDA":
@@ -74,21 +62,51 @@ def detect_compliance(
             "vendor_requirements.csv"
         )
 
+    # =====================================
+    # READ FILE
+    # =====================================
+
     requirements_df = pd.read_csv(
         requirements_file
     )
+
+    print("\nLoaded Compliance File:")
+    print(requirements_file)
+
+    print("\nColumns:")
+    print(requirements_df.columns.tolist())
+
+    # =====================================
+    # VALIDATION
+    # =====================================
+
+    required_columns = [
+        "requirement",
+        "description",
+        "keywords"
+    ]
+
+    for col in required_columns:
+
+        if col not in requirements_df.columns:
+
+            raise ValueError(
+                f"Missing column '{col}' "
+                f"in {requirements_file}"
+            )
 
     print(
         f"\nTotal Clauses: {len(clauses_df)}"
     )
 
     print(
-        f"Compliance Requirements: {len(requirements_df)}"
+        f"Compliance Requirements: "
+        f"{len(requirements_df)}"
     )
 
-    model = SentenceTransformer(
-        "sentence-transformers/all-MiniLM-L6-v2"
-    )
+    # =====================================
+    # EMBEDDINGS
+    # =====================================
 
     clause_embeddings = model.encode(
         clauses_df["text"].tolist(),
@@ -97,10 +115,19 @@ def detect_compliance(
 
     results = []
 
+    # =====================================
+    # CHECK EACH REQUIREMENT
+    # =====================================
+
     for _, row in requirements_df.iterrows():
 
         requirement = row["requirement"]
+
         description = row["description"]
+
+        keywords = str(
+            row["keywords"]
+        ).lower().split("|")
 
         requirement_embedding = model.encode(
             [description]
@@ -113,17 +140,70 @@ def detect_compliance(
 
         best_idx = similarities.argmax()
 
-        best_score = similarities[best_idx]
-
-        matched_clause = clauses_df.iloc[
+        best_score = similarities[
             best_idx
-        ]["title"]
+        ]
 
-        status = (
-            "FOUND"
-            if best_score >= SIMILARITY_THRESHOLD
-            else "MISSING"
+        matched_clause = (
+            clauses_df.iloc[
+                best_idx
+            ]["title"]
         )
+
+        matched_text = str(
+            clauses_df.iloc[
+                best_idx
+            ]["text"]
+        ).lower()
+
+        # ==============================
+        # KEYWORD SCORE
+        # ==============================
+
+        keyword_hits = sum(
+
+            1
+            for keyword in keywords
+
+            if keyword.strip()
+            and keyword.strip()
+            in matched_text
+
+        )
+
+        keyword_score = (
+
+            keyword_hits
+            /
+            len(keywords)
+
+            if len(keywords) > 0
+            else 0
+
+        )
+
+        # ==============================
+        # HYBRID DECISION
+        # ==============================
+
+        semantic_found = (
+            best_score >=
+            SIMILARITY_THRESHOLD
+        )
+
+        status = "MISSING"
+
+        if semantic_found:
+
+            status = "FOUND"
+
+        elif keyword_score >= 0.75:
+
+            status = "FOUND"
+
+        # ==============================
+        # STORE RESULT
+        # ==============================
 
         results.append({
 
@@ -139,9 +219,20 @@ def detect_compliance(
                     3
                 ),
 
+            "keyword_score":
+                round(
+                    float(keyword_score),
+                    3
+                ),
+
             "matched_clause":
                 matched_clause
+
         })
+
+    # =====================================
+    # SAVE REPORT
+    # =====================================
 
     results_df = pd.DataFrame(
         results
@@ -162,51 +253,50 @@ def detect_compliance(
     return results_df
 
 
+# ==========================================
+# TEST
+# ==========================================
+
 if __name__ == "__main__":
 
+    clauses_file = (
+        PROJECT_ROOT /
+        "data" /
+        "processed" /
+        "all_clauses.csv"
+    )
+
+    clauses_df = pd.read_csv(
+        clauses_file
+    )
+
     results_df = detect_compliance(
-        contract_type="NDA"
+        clauses_df,
+        "NDA"
     )
 
     print("\n")
     print("=" * 80)
-    print("SEMANTIC COMPLIANCE REPORT")
+    print("COMPLIANCE REPORT")
     print("=" * 80)
 
-    for _, row in results_df.iterrows():
-
-        print(
-            "\nRequirement:",
-            row["requirement"]
-        )
-
-        print(
-            "Status:",
-            row["status"]
-        )
-
-        print(
-            "Similarity:",
-            row["similarity"]
-        )
-
-        print(
-            "Matched Clause:",
-            row["matched_clause"]
-        )
+    print(results_df)
 
     found_count = (
-        results_df["status"] == "FOUND"
+
+        results_df["status"]
+        ==
+        "FOUND"
+
     ).sum()
 
     score = (
-        found_count /
+
+        found_count
+        /
         len(results_df)
+
     ) * 100
 
-    print("\n")
-    print("=" * 80)
-    print(
-        f"Compliance Score: {score:.2f}%"
-    )
-    print("=" * 80)
+    print("\nCompliance Score:")
+    print(f"{score:.2f}%")

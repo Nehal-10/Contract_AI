@@ -1,7 +1,7 @@
-requirement,description
-Scope Of Services,Services are clearly described
-Payment Terms,Payment obligations are defined
-Limitation Of Liability,Liability limitations are specified
-Termination Clause,Termination conditions exist
-Dispute Resolution,Dispute resolution mechanism exists
-Governing Law,Governing law is specified
+requirement,description,keywords
+Scope Of Services,Services to be provided under the agreement are clearly defined,"services|scope|deliverables"
+Payment Terms,Payment obligations and invoicing terms are specified,"payment|fees|invoice"
+Limitation Of Liability,Liability limitations and exclusions are defined,"liability|damages|limitation"
+Termination Clause,Conditions under which the agreement may be terminated are specified,"terminate|termination|notice"
+Dispute Resolution,Process for resolving disputes between parties is defined,"dispute|arbitration|mediation"
+Governing Law,Applicable governing law and jurisdiction are specified,"law|jurisdiction|governing"

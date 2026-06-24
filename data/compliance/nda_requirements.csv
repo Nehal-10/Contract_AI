@@ -1,7 +1,7 @@
-requirement,description
-Definition Of Confidential Information,Contract clearly defines confidential information
-Confidentiality Obligations,Receiving party must protect confidential information
-Permitted Disclosures,Exceptions to confidentiality obligations are defined
-Return Or Destruction Of Information,Information must be returned or destroyed after termination
-Term Of Confidentiality,Duration of confidentiality obligations is specified
-Governing Law,Governing law and jurisdiction are specified
+requirement,description,keywords
+Definition Of Confidential Information,Definition of confidential information is included,"confidential|information|definition"
+Confidentiality Obligations,Obligations to protect confidential information are specified,"confidential|protect|disclosure"
+Permitted Disclosures,Exceptions and permitted disclosures are defined,"exceptions|disclosure|permitted"
+Return Or Destruction Of Information,Return or destruction obligations are included,"return|destroy|information"
+Term Of Confidentiality,Duration of confidentiality obligations is specified,"term|duration|confidentiality"
+Governing Law,Applicable governing law is specified,"law|jurisdiction|governing"

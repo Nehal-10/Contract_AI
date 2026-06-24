@@ -1,7 +1,7 @@
-requirement,status,similarity,matched_clause
-Definition Of Confidential Information,FOUND,0.621,Definitions:
-Confidentiality Obligations,FOUND,0.56,Need to Know. Auditor shall restrict disclosure of such Confidential Information
-Permitted Disclosures,FOUND,0.577,No Conflict. The parties represent and warrant that the performance of its
-Return Or Destruction Of Information,FOUND,0.58,Survival. Both parties agree that all of their obligations undertaken herein with
-Term Of Confidentiality,FOUND,0.663,Survival. Both parties agree that all of their obligations undertaken herein with
-Governing Law,FOUND,0.591,Governing Law. This Agreement shall be interpreted in accordance with and
+requirement,status,similarity,keyword_score,matched_clause
+Definition Of Confidential Information,FOUND,0.67,0.667,Definitions:
+Confidentiality Obligations,FOUND,0.613,0.333,Need to Know. Auditor shall restrict disclosure of such Confidential Information
+Permitted Disclosures,FOUND,0.654,0.333,Exceptions. The Confidentiality obligations as enumerated in Article 2 of this
+Return Or Destruction Of Information,MISSING,0.466,0.0,No Conflict. The parties represent and warrant that the performance of its
+Term Of Confidentiality,FOUND,0.663,0.333,Survival. Both parties agree that all of their obligations undertaken herein with
+Governing Law,FOUND,0.522,0.0,"Amendments. No amendment, modification and/or discharge of this Agreement"
