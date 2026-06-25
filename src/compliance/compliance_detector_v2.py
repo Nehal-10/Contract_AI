@@ -74,7 +74,9 @@ def detect_compliance(
     print(requirements_file)
 
     print("\nColumns:")
-    print(requirements_df.columns.tolist())
+    print(
+        requirements_df.columns.tolist()
+    )
 
     # =====================================
     # VALIDATION
@@ -156,6 +158,14 @@ def detect_compliance(
             ]["text"]
         ).lower()
 
+        title_text = str(
+            matched_clause
+        ).lower()
+
+        requirement_text = str(
+            requirement
+        ).lower()
+
         # ==============================
         # KEYWORD SCORE
         # ==============================
@@ -183,23 +193,96 @@ def detect_compliance(
         )
 
         # ==============================
-        # HYBRID DECISION
+        # TITLE BOOST
         # ==============================
 
-        semantic_found = (
-            best_score >=
-            SIMILARITY_THRESHOLD
+        title_boost = 0
+
+        requirement_words = (
+            requirement_text
+            .replace("_", " ")
+            .split()
         )
 
-        status = "MISSING"
+        for word in requirement_words:
 
-        if semantic_found:
+            if len(word) > 4 and word in title_text:
 
+                title_boost = 0.10
+                break
+       
+        # ==============================
+        # FINAL COMBINED SCORE
+        # ==============================
+
+        combined_score = (
+
+            (best_score * 0.70)
+
+            +
+
+            (keyword_score * 0.20)
+
+            +
+
+            title_boost
+
+        )
+
+        # ==============================
+        # TITLE BOOST
+        # ==============================
+
+        title_text = str(
+            matched_clause
+        ).lower()
+        requirement_text = str(
+            requirement
+        ).lower()
+        title_boost = 0
+        for word in requirement_text.split():
+            if word in title_text:
+                title_boost = 0.10
+                break
+        # SPECIAL CASE
+        if (
+            "governing law" in requirement_text
+            and
+            "governing law" in title_text
+            ):
+            title_boost += 0.20
+        # ==============================
+        #  COMBINED SCORE
+        #  ==============================
+        combined_score = (
+            (best_score * 0.60)
+            +
+            (keyword_score * 0.30)
+            +
+            title_boost
+        )
+        # ==============================
+        #  HYBRID DECISION
+        # ==============================
+        if best_score >= 0.60:
             status = "FOUND"
-
+        elif combined_score >= 0.55:
+            status = "FOUND"
+            
         elif keyword_score >= 0.75:
-
             status = "FOUND"
+        else:
+            status = "MISSING"
+        # ==============================
+        #  DEBUG OUTPUT
+        #  ==============================
+        print(
+            f"{requirement} | "
+            f"Semantic={best_score:.3f} | "
+            f"Keyword={keyword_score:.3f} | "
+            f"TitleBoost={title_boost:.2f} | "
+            f"Combined={combined_score:.3f}"
+        )
 
         # ==============================
         # STORE RESULT
@@ -222,6 +305,12 @@ def detect_compliance(
             "keyword_score":
                 round(
                     float(keyword_score),
+                    3
+                ),
+
+            "combined_score":
+                round(
+                    float(combined_score),
                     3
                 ),
 
