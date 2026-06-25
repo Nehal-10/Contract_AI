@@ -1,25 +1,35 @@
-from pathlib import Path
-
 from fastapi import FastAPI
-from fastapi import UploadFile
-from fastapi import File
+from fastapi.middleware.cors import CORSMiddleware
+from src.database.db import (
+    create_tables
+)
 
-from src.pipeline.analyze_uploaded_contract import (
-    analyze_contract
+from src.api.routes import (
+    router
 )
 
 app = FastAPI(
     title="Contract AI API"
 )
+app.add_middleware(
+    CORSMiddleware,
 
-UPLOAD_DIR = Path(
-    "data/uploads"
+    allow_origins=[
+        "http://127.0.0.1:5500",
+        "http://localhost:5500"
+    ],
+
+    allow_credentials=True,
+
+    allow_methods=["*"],
+
+    allow_headers=["*"]
 )
 
-UPLOAD_DIR.mkdir(
-    parents=True,
-    exist_ok=True
-)
+@app.on_event("startup")
+def startup():
+
+    create_tables()
 
 
 @app.get("/")
@@ -31,27 +41,4 @@ def home():
     }
 
 
-@app.post("/analyze")
-async def analyze_pdf(
-    file: UploadFile = File(...)
-):
-
-    file_path = (
-        UPLOAD_DIR /
-        file.filename
-    )
-
-    contents = await file.read()
-
-    with open(
-        file_path,
-        "wb"
-    ) as f:
-
-        f.write(contents)
-
-    result = analyze_contract(
-        file_path
-    )
-
-    return result
+app.include_router(router)
